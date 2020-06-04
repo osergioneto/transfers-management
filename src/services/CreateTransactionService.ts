@@ -34,25 +34,29 @@ class CreateTransactionService {
     title,
     category,
   }: Request): Promise<Transaction> {
-    if (type === 'outcome') {
-      this.hasFund(value);
-    }
+    try {
+      if (type === 'outcome') {
+        this.hasFund(value);
+      }
 
-    let categoryExists = await this.categoryRepository.findOne({
-      where: { title: category },
-    });
-    if (!categoryExists) {
-      categoryExists = await this.categoryRepository.save({
-        title: category,
+      let categoryExists = await this.categoryRepository.findOne({
+        where: { title: category },
       });
-    }
+      if (!categoryExists) {
+        categoryExists = await this.categoryRepository.save({
+          title: category,
+        });
+      }
 
-    return this.transactionsRepository.save({
-      title,
-      value,
-      type,
-      category_id: categoryExists.id,
-    });
+      return this.transactionsRepository.save({
+        title,
+        value,
+        type,
+        category: categoryExists,
+      });
+    } catch (error) {
+      throw new AppError(error);
+    }
   }
 }
 
