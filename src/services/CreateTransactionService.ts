@@ -3,6 +3,10 @@ import Transaction from '../models/Transaction';
 import TransactionsRepository from '../repositories/TransactionsRepository';
 
 interface Request {
+  value: number;
+}
+
+interface Request {
   title: string;
   value: number;
   type: 'income' | 'outcome';
@@ -10,21 +14,17 @@ interface Request {
 }
 
 class CreateTransactionService {
-  private transactionsRepository: TransactionsRepository;
+  private transactionsRepository = new TransactionsRepository();
 
-  constructor(transactionsRepository: TransactionsRepository) {
-    this.transactionsRepository = transactionsRepository;
-  }
-
-  private hasFund(value: number): void {
-    const { total } = this.transactionsRepository.getBalance();
+  private async hasFund(value: number): Promise<void> {
+    const { total } = await this.transactionsRepository.getBalance();
 
     if (value > total) {
       throw new AppError("You can't create a outcome without a valid balance.");
     }
   }
 
-  public async execute(): Promise<Transaction> {
+  public async execute({ value, type, title }: Request): Promise<Transaction> {
     if (type === 'outcome') {
       this.hasFund(value);
     }
