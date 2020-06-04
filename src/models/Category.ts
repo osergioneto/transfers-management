@@ -22,8 +22,8 @@ class Category {
   @UpdateDateColumn()
   updated_at: Date;
 
-  @OneToMany(() => Transaction, transaction => transaction.category_id)
-  transaction: Transaction;
+  @OneToMany(() => Transaction, transaction => transaction.category)
+  transactions: Transaction[];
 }
 
 export default Category;
