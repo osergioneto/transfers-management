@@ -11,9 +11,17 @@ const transactionsRouter = Router();
 transactionsRouter.get('/', async (_request, response) => {
   try {
     const transactionsRepository = getCustomRepository(TransactionsRepository);
-    const balance = await transactionsRepository.getBalance();
+    const balancePromise = transactionsRepository.getBalance();
+    const transactionsPromise = transactionsRepository.find({
+      relations: ['category'],
+    });
 
-    return response.status(200).json(balance);
+    const [balance, transactions] = await Promise.all([
+      balancePromise,
+      transactionsPromise,
+    ]);
+
+    return response.status(200).json({ transactions, balance });
   } catch (error) {
     throw new AppError(error.msg);
   }
