@@ -24,7 +24,10 @@ class CreateTransactionService {
     const { total } = await this.transactionsRepository.getBalance();
 
     if (value > total) {
-      throw new AppError("You can't create a outcome without a valid balance.");
+      throw new AppError(
+        "You can't create a outcome without a valid balance.",
+        400,
+      );
     }
   }
 
@@ -34,29 +37,25 @@ class CreateTransactionService {
     title,
     category,
   }: Request): Promise<Transaction> {
-    try {
-      if (type === 'outcome') {
-        this.hasFund(value);
-      }
-
-      let categoryExists = await this.categoryRepository.findOne({
-        where: { title: category },
-      });
-      if (!categoryExists) {
-        categoryExists = await this.categoryRepository.save({
-          title: category,
-        });
-      }
-
-      return this.transactionsRepository.save({
-        title,
-        value,
-        type,
-        category: categoryExists,
-      });
-    } catch (error) {
-      throw new AppError(error);
+    if (type === 'outcome') {
+      await this.hasFund(value);
     }
+
+    let categoryExists = await this.categoryRepository.findOne({
+      where: { title: category },
+    });
+    if (!categoryExists) {
+      categoryExists = await this.categoryRepository.save({
+        title: category,
+      });
+    }
+
+    return this.transactionsRepository.save({
+      title,
+      value,
+      type,
+      category: categoryExists,
+    });
   }
 }
 
