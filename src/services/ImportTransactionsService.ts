@@ -2,15 +2,15 @@ import Transaction from '../models/Transaction';
 import CreateTransactionService from './CreateTransactionService';
 
 interface Request {
-  transactionsFile: Buffer;
+  file: Buffer;
 }
 
 class ImportTransactionsService {
-  public async execute({ transactionsFile }: Request): Promise<Transaction[]> {
+  public async execute({ file }: Request): Promise<Transaction[]> {
     // const transactionsRepository = getRepository(Transaction);
     const createTransactionService = new CreateTransactionService();
 
-    const rows = transactionsFile.toString().split('\n');
+    const rows = file.toString().split('\n');
     rows.pop();
     rows.shift();
     const transactions = [];
@@ -18,7 +18,6 @@ class ImportTransactionsService {
     // eslint-disable-next-line no-restricted-syntax
     for await (const row of rows) {
       const [title, type, value, category] = row.split(', ');
-      console.log({ title, value, type, category });
       const savedTransaction = await createTransactionService.execute({
         title,
         value: Number(value),
